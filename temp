@@ -1,0 +1,459 @@
+om = {
+    getHbParams: function (p) {
+        var utag_keys = new Array('siteEdition', 'cm.ssf', 'siteSection', 'siteType', 'siteHier', 'adBlockStatus', 'articleId', 'articleType', 'articleTitle', 'brandPlatformId', 'continueWatchingShowsList', 'contPlayState', 'endCardCountdownTime', 'endCardContentPosition', 'endCardContentSelection', 'endCardType', 'endCardSource', 'endCardContentList', 'flashPromptAllow', 'optimizleyExperiment', 'pageType', 'pageTypeId', 'pageOntologyId', 'pageViewGuid', 'productPricingPlan', 'productOfferPeriod', 'mediaAutoPlay', 'mediaDynamicPlay', 'mediaPartnerId', 'mediaDistNetwork', 'mediaDeviceId', 'mediaEndCardUi', 'mediaEndCardUiShowsList', 'mediaResume', 'mediaResumeSource', 'mediaSvodContentType', 'mediaIsPaidContent', 'mediaType', 'mediaWatchNextType', 'mediaWatchNextTypePosition', 'mediaWatchNextTypeReferrer', 'showId', 'showTitle', 'showEpisodeId', 'showEpisodeTitle', 'showtimeAddConfirmation', 'mediaContentType', 'userState', 'userStatus', 'userId', 'userType', 'userRegId', 'vod_type', 'deviceType', 'dwAnonId', 'searchTerm', 'sitePrimaryRsid', 'screenName', 'pageTitle', 'mediaPartnerID', 'adID', 'adTitle', 'adDeviceID', 'mvpdPartnerName', 'showSectionTitle', 'showDayPart', 'showAirDate', 'showBrowseCategory', 'showGenre', 'castSenderApp', 'rowHeaderTitle', 'rowHeaderPosition', 'videoSessionID', 'connectedState', 'mediaDownloaded', 'liveTvChannel', 'stationCode', 'playerSubtitleLanguage', 'playerAudioLanguage', 'posRowNumber', 'posColNumber', 'userRegType', 'userLoginType', 'ottActivationPartner', 'contentBrand', 'movieBrowseCategory', 'movieGenre');
+        var hbParams = {},
+            data = {};
+        if (!p) {
+            p = {}
+        };
+        for (var i = 0; i < utag_keys.length; i++) {
+            if (!!utag_data[utag_keys[i]]) {
+                hbParams[utag_keys[i]] = utag_data[utag_keys[i]];
+            }
+        }
+        $.extend(data, hbParams, {
+            'siteRsids': utag_data['_scAccount'],
+            'siteCode': utag_data['_siteCode'],
+            'pageUrl': utag_data['_pageUrl'],
+            'sitePrimaryRsid': utag_data['_sitePrimaryRsid']
+        }, p);
+        return data;
+    },
+
+    trackChatEvent: function (data, eventId) {
+        var room = (!!data.room) ? data.room : "";
+        var uuid = (!!data.uuid) ? data.uuid : "";
+        var event_str = 'bblf_chat|room|' + room + '|' + eventId;
+        var params = {
+            link_text: 'trackBBLFChatClick',
+            _clickAction: 'eventClick',
+            _clickText: event_str
+        };
+        var udata = {};
+        jQuery.extend(udata, utag_data, params);
+        utag.link(udata);
+        return false;
+    },
+    trackAppLog: function (p) {
+        var a = (!!p.msg) ? p.msg : "";
+        var b = (!!p.type) ? p.type : "";
+        var data = {};
+        $.extend(data, utag_data, {
+            'link_text': 'trackAppLog',
+            'pageEvent': 'false',
+            '_clickAction': 'eventAppLog',
+            '_appLog': b + '|' + a
+        });
+        utag.link(data);
+        // reset these vars
+        utag_data['_appLog'] = '';
+        utag_data['_clickAction'] = '';
+        return false;
+    },
+    trackClick: function (p) {
+        var a = (!!p.item) ? p.item : "";
+        var data = {};
+        utag_data['_pageActions'] = '';
+        utag_data['pageEvent'] = '';
+        utag_data['sc_events'] = '';
+        utag_data['purchaseEventOrderComplete'] = '';
+        utag_data['flashPrompt'] = '';
+        $.extend(data, utag_data, {
+            'link_text': 'trackClick',
+            '_clickAction': 'eventClick',
+            '_clickText': a,
+            'pageEvent': false,
+            '_pageActions': false,
+            '_videoAction': 'false'
+        });
+        utag.link(data);
+        return false;
+    },
+    trackSocialClick: function (p) {
+        var a = (!!p.socialService) ? p.socialService : "";
+        var data = {};
+        $.extend(data, utag_data, {
+            'link_text': 'trackSocialClick',
+            '_clickAction': 'socialShareClick',
+            'pageEvent': 'false',
+            'socialService': a,
+            '_levtType': 'social',
+            '_levtEventType': 'share',
+            '_riaEventT': 'share',
+            '_riaSsite': a,
+            '_riaWd': 'sharebar',
+            '_riaWdLoc': 'river'
+        });
+        utag.link(data);
+        return false;
+    },
+    trackView: function (p) {
+        var data = {};
+        if (!p) {
+            p = {}
+        };
+        $.extend(data, utag_data, {
+            '_noViewTrack': 'QUALTRICS'
+        }, p);
+        if (p["marqueeStatus"] == "view") {
+            utag.link(data);
+            utag_data['_clickAction'] = '';
+            utag_data['_clickText'] = '';
+        } else {
+            utag.view(data);
+        }
+        return false;
+    },
+    trackLogin: function (p) {
+        var data = {};
+        if (typeof p == "undefined") {
+            var p = {};
+        }
+        if (!!p.userStatus) {
+            delete p.userStatus;
+        }
+        $.extend(data, utag_data, {
+            '_noLinkTrack': 'LEVT',
+            'pageEvent': false,
+            '_clickAction': 'eventLogin',
+            'link_text': 'trackLogin'
+        }, p);
+        utag.link(data);
+        return false;
+    },
+    trackNewRegistration: function (p) {
+        var data = {};
+        if (typeof p == "undefined") {
+            var p = {};
+        }
+        $.extend(data, utag_data, {
+            '_noLinkTrack': 'LEVT',
+            'pageEvent': false,
+            '_clickAction': 'eventRegNew',
+            'link_text': 'trackNewRegistration',
+            'link_name': 'trackNewRegistration'
+        }, p);
+        utag.link(data);
+        return false;
+    },
+    trackOverlayView: function (p) {
+        var data = {};
+        $.extend(data, utag_data, p);
+        utag.view(data);
+        return false;
+    },
+    trackPaymentSubmitClick: function (p) {
+        var a = (!!p.purchaseOrderRefNum) ? p.purchaseOrderRefNum : "";
+        var data = {};
+        $.extend(data, utag_data, {
+            'link_text': 'trackPaymentSubmitClick',
+            '_clickAction': 'eventPaymentSubmit',
+            'purchaseOrderRefNum': a,
+            'pageEvent': false
+        });
+        utag.link(data);
+        return false;
+    },
+    trackLocationCheckClick: function (p) {
+        var a = (!!p.result) ? p.result : "";
+        var data = {};
+        $.extend(data, utag_data, {
+            'link_text': 'trackLocationCheckClick',
+            '_clickAction': 'evt_location_' + a
+        });
+        utag.link(data);
+        return false;
+    },
+    trackChannelSelectionOpen: function () {
+        var data = {};
+        $.extend(data, utag_data, {
+            'link_text': 'trackChannelSelectionOpen',
+            '_clickAction': 'evt_chanselect_view'
+        });
+        utag.link(data);
+        return false;
+    },
+    trackChannelSelectionClick: function (p) {
+        var a = (!!p.live_station) ? p.live_station : "";
+        var data = {};
+        $.extend(data, utag_data, {
+            'link_text': 'trackChannelSelectionClick',
+            'live_station': a,
+            'event_type': 'evt_chanselect_click'
+        });
+        utag.link(data);
+        return false;
+    },
+    trackMyCBSAdd: function (p) {
+        if (!p) {
+            p = {}
+        };
+        var data = {};
+        $.extend(data, utag_data, p, {
+            'link_text': 'trackMyCBSAdd',
+            '_clickAction': 'eventMyCBSAdd'
+        });
+        utag.link(data);
+        return false;
+    },
+    trackMyCBSRemove: function (p) {
+        if (!p) {
+            p = {}
+        };
+        var data = {};
+        $.extend(data, utag_data, p, {
+            'link_text': 'trackMyCBSAdd',
+            '_clickAction': 'eventMyCBSRemove'
+        });
+        utag.link(data);
+        return false;
+    },
+    trackCast: function (e, c) {
+        var data = {};
+        var action = e ? (c ? 'eventCastingConnected' : 'eventCastingNotConnected') : 'eventCastingNotEnabled';
+        var state = 'chromecast:' + (e ? 'on' : 'off');
+        $.extend(data, utag_data, {
+            'link_text': 'trackCasting',
+            '_clickAction': action,
+            '_chromecastState': state,
+            'pageEvent': false
+        });
+        utag.link(data);
+        return false;
+    },
+    trackH5Video: function (p) {
+        var data = {};
+        var st = (p.eVar3) ? p.eVar3 : '';
+        var va = (p.eVar31) ? p.eVar31 : '';
+        var vb = (p.eVar25) ? p.eVar25 : '';
+        var vc = (p.eVar32) ? p.eVar32 : '';
+        var vd = (p.eVar33) ? p.eVar33 : '';
+        var ve = (p.eVar34) ? p.eVar34 : '';
+        var vf = (p.eVar38) ? p.eVar38 : '';
+        var vg = (p.eVar39) ? p.eVar39 : '';
+        var vp;
+        var s;
+        if (p.events) {
+            if (p.events.indexOf('event52') > -1) {
+                s = 'videoPlayStart';
+            } else if (p.events.indexOf('event53') > -1) {
+                s = 'videoPlay25Percent';
+            } else if (p.events.indexOf('event54') > -1) {
+                s = 'videoPlay50Percent';
+            } else if (p.events.indexOf('event55') > -1) {
+                s = 'videoPlay75Percent';
+            } else if (p.events.indexOf('event58') > -1) {
+                s = 'videoPlayComplete';
+            } else if (p.events.indexOf('event60') > -1) {
+                s = 'videoAdStart';
+            } else if (p.events.indexOf('event62') > -1) {
+                s = 'videoAd25Percent';
+            } else if (p.events.indexOf('event63') > -1) {
+                s = 'videoAd50Percent';
+            } else if (p.events.indexOf('event64') > -1) {
+                s = 'videoAd75Percent';
+            } else if (p.events.indexOf('event61') > -1) {
+                s = 'videoAdComplete';
+            } else {
+                s = 'videoPaused';
+            }
+            var vh = 0;
+            if (p.events.indexOf('=') > -1) {
+                vh = p.events.split('=')[1];
+            }
+        }
+        try {
+            if (typeof (cbsiPlayer["curContentVOpts"]) != 'undefined') {
+                var vopts = cbsiPlayer["curContentVOpts"]
+                if (!!vopts) {
+                    vp = (typeof (vopts["isPaidContent"]) != 'undefined') ? "svod" : "non-svod";
+                }
+            }
+        } catch (e) {
+            console.log("TEALIUM - Unable to read cbsiPlayer.curContentVOpts.isPaidContent");
+        }
+        $.extend(data, utag_data, {
+            '_videoAction': s,
+            'link_text': 'trackH5Video-' + s,
+            'videoId': va,
+            'videoTitle': vb,
+            'videoPartners': vc,
+            'videoAdId': vd,
+            'videoAdTitle': ve,
+            'videoContentType': vf,
+            'videoSegment': vg,
+            'videoTime': vh,
+            'siteType': st,
+            'videoIsPaidContent': vp,
+            '_clickAction': 'false',
+            '_clickText': ''
+        });
+        utag.link(data);
+        return false;
+    },
+    trackAccountCancel: function (p) {
+        var data = {};
+        $.extend(data, utag_data, {
+            'link_text': 'trackAccountCancel',
+            '_clickAction': 'eventAccountCancel'
+        });
+        utag.link(data);
+        return false;
+    },
+    trackMarqueeView: function (p) {
+        var data = {};
+        $.extend(data, utag_data, p);
+        utag.link(data);
+        return false;
+    },
+    trackMVPDAuthentication: function (p) {
+        if (!p) {
+            p = {}
+        };
+        var data = {};
+        $.extend(data, utag_data, p, {
+            'link_text': 'trackMVPDAuthentication',
+            '_clickAction': 'eventMVPDAuthentication'
+        });
+        utag.link(data);
+        return false;
+    },
+    trackInternalSearch: function (p) {
+        if (!p) {
+            p = {}
+        };
+        var data = {};
+        $.extend(data, utag_data, p, {
+            'link_text': 'trackInternalSearch'
+        });
+        utag.link(data);
+        return false;
+    },
+    trackEndCardUi: function (p) {
+        if (!p) {
+            p = {}
+        };
+        var data = {};
+        $.extend(data, utag_data, p, {
+            'link_text': 'trackEndCardUi'
+        });
+        utag.link(data);
+        return false;
+    },
+    trackAction: function (link_name, p) {
+        var data = {};
+        utag_data.event_name = '';
+        utag_data.link_text = (!!link_name) ? link_name : "";
+        $.extend(data, utag_data, p);
+        utag.link(data);
+        if (data.pageType == "svod_complete" && data.purchaseEventOrderComplete == 1 && utag_data.link_text =='trackPaymentComplete') {
+            this.sendEvent(this._formatXDM(link_name, data));
+            //alloyTrackAction(p);
+            //handle XDM purchase complete event seperately
+
+        }
+        om._clearVars();
+        return false;
+    },
+    _formatXDM(evt, d) {
+        var map = {};
+        switch (evt) {
+            case "trackPaymentComplete": {
+                //fields specific for this event
+                map = {
+                    "brandPlatformId":d.brandPlatformId,
+                    "fbId":d.tealium_random,
+                    "fbqVal":d.fbpCookie,
+                    "purchaseOrderId":d.purchaseOrderId,
+                    "purchasePrice":d.purchasePrice,
+                    "purchaseProductName":d.purchaseProductName,
+                    "purchaseProduct":d.purchaseProduct,
+                    "userRegId":d.userRegId,
+                    "userType":d.userType,
+                    "userStatus":d.userStatus,
+                    "bundleStatus":d.bundleStatus,
+                    "userHash":d.userHash,
+                    "userProfileId":d.userProfileId,
+                    "userProfileCategory":d.userProfileCategory,
+                    "userProfileRefId":d.userProfileRefId,
+                    "userProfileMaster":d.userProfileMaster,
+                    "pageViewGuid":d.pageViewGuid,
+                    "pageType":d.pageType,
+                    "siteEdition":d.siteEdition, 
+                    "tealiumEnv":utag_data["ut.env"] //tealium env switcher 
+
+                }
+                break;
+            }
+            default:
+                map = {};
+        }
+        var xEvent = {
+            "xdm": {},
+            "data":{"pplus":map},
+            "type": evt
+        };
+        return xEvent;
+    },
+    trackState: function (p) {
+        var data = {};
+        $.extend(data, utag_data, p);
+        utag.view(data);
+        return false;
+    },
+    _clearVars: function () {
+        if (typeof s !== 'undefined' && s) {
+            s.clearVars();
+            if (!!s.contextData) {
+                s.contextData = {};
+            }
+        }
+    },
+    sendEvent: function(p) {     
+            p.data.pplus.contentFeatures.forEach(function(items){
+                delete items.position;
+            })
+        }
+        if (!p.hasOwnProperty("data")) {
+            p = {"xdm":p}
+        }
+        //recursively convert value to strings
+        p = this._toString(p);
+        //perform the alloy sendEvent
+        alloy("sendEvent", p);
+        //set documentUnloading 
+        p.documentUnloading = (p.xdm.eventType === "carouselSelect");
+    },
+    _toString: function (o) {
+        Object.keys(o).forEach(k => {
+            if (typeof o[k] === 'object') {
+                return this._toString(o[k]);
+            }
+            o[k] = '' + o[k];
+        });
+        return o;
+    },
+}
+function alloyTrackAction(data) {
+    try {
+        if (data.pageType == "svod_complete" && data.purchaseEventOrderComplete == 1) {
+            var alloyEventName = "purchaseOrderComplete";
+            var clone = function (value) {
+                return JSON.parse(JSON.stringify(value));
+            };
+            var alloyData = data;
+            var AlloyObj = {
+                "eventType": alloyEventName,
+                "_cbsi": alloyData
+            };
+            AlloyObj._cbsi.facebook_id = utag_data.tealium_random;
+            AlloyObj._cbsi.fbq_value = utag_data.fbpCookie;
+            AlloyObj._cbsi.userAgent = navigator.userAgent;
+            AlloyObj._cbsi.brandPlatformId = utag_data.brandPlatformId;
+            AlloyObj._cbsi.pageURL = utag_data.pageUrl;
+            /*alloy("sendEvent", {
+              "xdm": clone(AlloyObj)
+            });*/
+        }
+    } catch (e) { }
+}
